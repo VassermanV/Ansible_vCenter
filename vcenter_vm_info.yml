@@ -1,0 +1,17 @@
+---
+- name: VMware
+  hosts: localhost
+  connection: local 
+  gather_facts: no 
+ 
+  tasks:
+    - name: Show info about specific VM 
+      ansible.builtin.vmware_guest:
+        hostname: 192.168.0.1                 # vCenter IP address 
+        user: username                        # user with sufficient permissions 
+        password: password
+        validate_certs: false
+        name: VM_Name                         # vm name, regarding which you want to see data
+      register: result
+    - debug: 
+        msg: "{{result}}"
