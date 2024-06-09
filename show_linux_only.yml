@@ -1,0 +1,35 @@
+---
+- name: VMware
+  hosts: localhost
+  connection: local 
+  gather_facts: no 
+   
+  tasks:
+    - name: Gather all registered virtual machines
+      vmware_vm_info:                                                       # connecting to vCenter to retrieve data 
+                     
+        hostname: 192.168.1.1 
+        user: username
+        password: password
+        validate_certs: no
+             
+        
+      register: vm_info
+    
+    - name: Display virtual machines with Linux OS                          # if you want to see output immediately
+      debug:
+        msg: "{{ item.guest_name }}"
+      loop: "{{ vm_info.virtual_machines }}"
+      when: item.guest_fullname == 'Ubuntu Linux (64-bit)'
+
+
+    - name: Save virtual machines with Linux OS to a file 
+      copy:                                                                  # this module will copy result to txt file 
+        content: |
+          Virtual Machines with Linux OS:                                    
+          {% for item in vm_info.virtual_machines %}                         # I`m taking output from variable
+          {% if item.guest_fullname == 'Ubuntu Linux (64-bit)' %}            # and searching only condition when OS is Linux (or any other) 
+          {{ item.guest_name }}                                              # this line will print only VM name
+          {% endif %}
+          {% endfor %}
+        dest: /output.txt                                                    # destnation where to store result (if file/directory not present it`ll be created) 
