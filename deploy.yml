@@ -1,0 +1,40 @@
+---
+- name: VMware
+  hosts: localhost
+  connection: local 
+  gather_facts: no 
+  
+  tasks:
+    - name: Deploy VM
+      ansible.builtin.vmware_guest:
+        hostname: 192.168.0.1 
+        user: username
+        password: password
+        validate_certs: no
+        folder: /foldername                                                  # specify this parameter if you want to deploy VM in specific folder
+        name: vm_name                                                        # VM name
+        state: poweredon
+        guest_id: rhel8_64Guest                                              # this parameter unique for each OS
+        datacenter: Datacenter 
+        cluster: Cluster
+        disk:                                                                # use this module to customize disks  
+           - size_gb: 40
+             controller_number: 0                                            # SCSI Controller number (from 0 to 3) 
+             unit_number: 0                                                  # disk number 
+             controller_type: 'paravirtual'
+             datastore: Datastore_name                                       
+        cdrom:                                                               # use this module to specify ISO image location
+            - controller_number: 0
+              unit_number: 0
+              controller_type: ide                                           # CD/DVD drive
+              iso_path: "[datastore] Ansible/rhel-8.7-x86_64-dvd.iso"        # path to ISO file 
+              type: iso     
+        hardware:                                                            # customize hardware settings
+            num_cpus: 2
+            memory_mb: 8192
+        
+        
+      register : new_vm
+
+    - debug:
+          var: new_vm
